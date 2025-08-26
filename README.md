@@ -12,11 +12,21 @@
 - Python 3.10+（建議）
 - 已安裝且可連線的遠端 Ollama 服務（預設 `config.json` 內設定）
 
-## 安裝
+## 快速開始（Windows）
+- 建議建立虛擬環境，避免套件版本衝突
 ```bash
 cd "C:\MyDocuments\Leadtek Research\Products\AIDMS\Technical Survey\LangChain\code"
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -U pip
 python -m pip install -r requirements.txt
 ```
+- 設定連線與模型（見下節）後，放入測試圖片至 `code/data`
+- 直接以模組方式執行（避免相對匯入問題）
+```bash
+python -m code.chains.evidence_analysis
+```
+> 注意：請從專案根目錄 `code/` 之外上一層執行，或確保當前工作目錄包含 `code` 模組（上述 `cd` 指令已設定）。
 
 ## 設定
 編輯 `code/config.json`：
@@ -28,8 +38,8 @@ python -m pip install -r requirements.txt
   }
 }
 ```
-- base_url: 你的雲端 Ollama 位址
-- model: 你的 VLM 模型名稱（請先於伺服器端拉取對應模型）
+- base_url：你的雲端/遠端 Ollama 位址
+- model：VLM 模型名稱（請先於伺服器端拉取對應模型）
 
 ## 專案結構
 ```
@@ -40,7 +50,7 @@ code/
   prompts/
     system_prompts.py          # 系統提示集中管理（含中文註解）
     __init__.py
-  data/                        # 測試圖片放置處（副檔名：jpg/jpeg/png/webp/bmp）
+  data/                        # 測試圖片放置處（jpg/jpeg/png/webp/bmp）
   config.json                  # 連線與模型設定
   requirements.txt
   README.md
@@ -60,6 +70,23 @@ python -m code.chains.evidence_analysis C:\path\to\images
 python -m code.chains.evidence_analysis C:\path\to\image.jpg
 ```
 
+### 參數與行為說明
+- 若提供路徑且為資料夾：會依副檔名篩選 `*.jpg, *.jpeg, *.png, *.webp, *.bmp` 後逐張處理
+- 若提供路徑且為檔案：只處理該圖片
+- 若未提供參數：自動掃描 `code/data` 目錄
+- 會將圖片轉為 base64 data URL 再送至遠端 VLM
+
+### 範例輸出（節錄）
+```text
+=== 處理第 1 張：code\data\01.jpg ===
+（模型回覆）
+
+=== 處理第 2 張：code\data\02.jpg ===
+（模型回覆）
+
+=== 全部處理完成，總耗時：12.34 秒 ===
+```
+
 ## 證物分析任務說明
 - 系統提示放於 `prompts/system_prompts.py` 的 `EVIDENCE_ANALYSIS_SYSTEM_PROMPT`
 - chain 設計（於 `chains/evidence_analysis.py`）：
@@ -67,23 +94,21 @@ python -m code.chains.evidence_analysis C:\path\to\image.jpg
   - human：文字 `{question}` + 圖片 `{image_url}`（base64 data URL）
   - 使用 `StrOutputParser()` 解析純文字輸出
 
-## 常見問題（FAQ）
-- 遠端無法讀取本機 `file://` 圖片：
-  - 本專案已將圖片轉為 base64 data URL 直接內嵌，避免路徑存取問題。
-- 執行時匯入錯誤（relative import）：
-  - 請使用模組方式執行：`python -m code.chains.evidence_analysis`。
-- 無法連線或模型不存在：
-  - 檢查 `config.json` 的 `base_url`/`model`，並確認伺服器已拉取對應模型。
-
-## 效能建議
-- 適度調整批次大小與逾時、重試策略（可在 chain 外圍加入）。
-- 大量圖片建議分批處理與記錄輸出到檔案（JSON/CSV）。
+## 疑難排解（Troubleshooting）
+- 無法 import/ModuleNotFoundError：
+  - 請以模組方式執行：`python -m code.chains.evidence_analysis`
+- 遠端無法讀取本機檔案：
+  - 本專案已將圖片轉為 base64 data URL 內嵌傳遞，無需 `file://` 存取
+- 連線錯誤或模型不存在：
+  - 檢查 `config.json` 的 `base_url` 與 `model`，確認伺服器已拉取/可用
+- 非支援的圖片格式：
+  - 請將圖片轉為 `jpg/jpeg/png/webp/bmp` 之一
 
 ## 擴充多任務範例
 - 新增任務：
-  1. 於 `prompts/system_prompts.py` 新增對應的 SYSTEM_PROMPT 常數。
-  2. 於 `chains/` 新增 `your_task.py`，參考 `evidence_analysis.py` 建立 chain。
-  3. 於 README 新增說明與指令。
+  1. 於 `prompts/system_prompts.py` 新增對應的 SYSTEM_PROMPT 常數
+  2. 於 `chains/` 新增 `your_task.py`，參考 `evidence_analysis.py` 建立 chain
+  3. 於 README 新增說明與指令
 
 ## 版權與授權
 - 本範例僅供學術與技術交流之用，請遵循各模型與資料來源的授權條款。
