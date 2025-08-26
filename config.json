@@ -1,0 +1,6 @@
+{
+  "ollama": {
+    "base_url": "http://10.1.1.4:29693",
+    "model": "mistral-small3.1:24b"
+  }
+}
