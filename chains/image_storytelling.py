@@ -1,11 +1,11 @@
 """
-Evidence Analysis Chain
+Image Storytelling Chain
 - 讀取 `code/config.json` 取得遠端 Ollama（VLM）伺服器 `base_url` 與 `model`
 - 從命令列參數或 `code/data` 目錄中挑選一張圖片
 - 將圖片（以 base64 data URL 內嵌）與文字提示與系統提示組成多模態訊息並輸出結果
 
 中文說明：
-- 此檔為「證物分析」任務的範例 chain
+- 此檔為「看圖說故事」任務的範例 chain
 - 支援單張圖片、資料夾多張圖片、自動掃描預設資料夾三種模式
 - 為避免遠端伺服器無法存取本機檔案，圖片以 base64 data URL 方式傳遞
 """
@@ -24,12 +24,12 @@ from langchain_core.output_parsers import StrOutputParser
 
 # 嘗試相對匯入；若以腳本直接執行失敗，則加入專案根目錄改用絕對匯入
 try:
-    from ..prompts.system_prompts import EVIDENCE_ANALYSIS_SYSTEM_PROMPT  # type: ignore
+    from ..prompts.system_prompts import IMAGE_STORYTELLING_SYSTEM_PROMPT  # type: ignore
 except Exception:
     PROJECT_ROOT_FOR_IMPORT = Path(__file__).resolve().parent.parent
     if str(PROJECT_ROOT_FOR_IMPORT) not in sys.path:
         sys.path.insert(0, str(PROJECT_ROOT_FOR_IMPORT))
-    from prompts.system_prompts import EVIDENCE_ANALYSIS_SYSTEM_PROMPT  # type: ignore
+    from prompts.system_prompts import IMAGE_STORYTELLING_SYSTEM_PROMPT  # type: ignore
 
 
 # 專案根目錄下的設定與資料目錄（此檔案位於 code/chains/）
@@ -84,7 +84,7 @@ def file_path_to_data_url(image_path: str) -> str:
 def build_chain(llm: ChatOllama):
     """以 ChatPromptTemplate 建立多模態 chain（system + human 文字與圖片）。"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", EVIDENCE_ANALYSIS_SYSTEM_PROMPT),
+        ("system", IMAGE_STORYTELLING_SYSTEM_PROMPT),
         (
             "human",
             [
@@ -134,7 +134,7 @@ def main() -> None:
         image_url = file_path_to_data_url(str(img_path))
         result = chain.invoke(
             {
-                "question": "請描述這張圖片的內容與重點。",
+                "question": "請為這張圖片創作一個有趣的故事。",
                 "image_url": image_url,
             }
         )
