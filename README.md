@@ -17,7 +17,6 @@
 ## 快速開始（Windows）
 - 建議建立虛擬環境，避免套件版本衝突
 ```bash
-cd "C:\MyDocuments\Leadtek Research\Products\AIDMS\Technical Survey\LangChain\<package_name>"
 python -m venv .venv
 .venv\Scripts\activate
 python -m pip install -U pip
